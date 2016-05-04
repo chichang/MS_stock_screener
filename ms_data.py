@@ -7,9 +7,7 @@ import logging
 import time
 import csv
 
-import parser
-
-parser._parseBalanceSheet()
+import ms_parser
 
 class MS_dataHandler:
 
@@ -19,6 +17,9 @@ class MS_dataHandler:
         useage:
 
         '''
+
+        print "initial data handler for: ", ticker
+
         logging.info("initialize data from financials.morningstar.com  ticker: %s", ticker)
 
         #ticker
@@ -47,12 +48,16 @@ class MS_dataHandler:
         logging.debug("income statement url: %s", income_statement_url)
 
         balance_sheet_url = self.getFinancialReportsURL(report_type=balance_sheet_str)
-        self.csv_urls["balance sheet"] = balance_sheet_url
+        self.csv_urls["balance_sheet"] = balance_sheet_url
         logging.debug("balance sheet url: %s", balance_sheet_url)
 
         cash_flow_url = self.getFinancialReportsURL(report_type=cash_flow_str)
         self.csv_urls["cash_flow"] = cash_flow_url
         logging.debug("cash flow url: %s", cash_flow_url)
+
+
+        print "requesting csv data : ", ticker
+
 
         result = self.retrieveCsv()
         if not result:
@@ -60,7 +65,7 @@ class MS_dataHandler:
             return None
 
 
-        print self.csv_files
+        #print self.csv_files
 
     def __str__(self):
         '''get basic info for the data.
@@ -123,7 +128,7 @@ class MS_dataHandler:
 
     def download(self, url, dest):
         '''downlads file.
-        TODO: better error check here.
+        TODO: better error handling here.
         '''
         try:
             #retrieve the url.
@@ -143,9 +148,54 @@ class MS_dataHandler:
         pass
 
 
+    def parseIncomeStatement(self):
+        print "parsing and creating income statement data ..."
+        ms_parser._parseIncomeStatement(self)
+
+    def parseBalanceSheet(self):
+        print "parsing and creating balance sheet data ..."
+        ms_parser._parseBalanceSheet(self)
+
+    def parseCashFlow(self):
+        print "parsing and creating cash flow data ..."
+        ms_parser._parseCashFlow(self)
+
+
+
+    def getFinancialData(self, statement_type, key, item):
+
+        if statement_type == "balance_sheet":
+            if hasattr(self, 'parsed_bs_data'):
+                #try get the data
+                return self.parsed_bs_data[key][item]
+                #except
+            else:
+                print "no parsed balance sheet data found. Please parse data. handler.parseBalanceSheet()"
+                return False
+
+        if statement_type == "income_statement":
+            if hasattr(self, 'parsed_is_data'):
+                return self.parsed_is_data[key][item]
+
+            else:
+                print "no parsed income statement data found. Please parse data. handler.parseIncomeStatement()"
+                return False
+
+
+        if statement_type == "cash_flow":
+            if hasattr(self, 'parsed_cf_data'):
+                return self.parsed_cf_data[key][item]
+
+            else:
+                print "no parsed cash flow data found. Please parse data. handler.parseCashFlow()"
+                return False
+
+
+
+
 
 #test run
-dwa_handler = MS_dataHandler(ticker="DWA")
+#dwa_handler = MS_dataHandler(ticker="DWA")
 
 
 
