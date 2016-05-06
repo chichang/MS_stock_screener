@@ -18,7 +18,7 @@ class MS_dataHandler:
 
         '''
 
-        print "initial data handler for: ", ticker
+        #print "initial data handler for: ", ticker
 
         logging.info("initialize data from financials.morningstar.com  ticker: %s", ticker)
 
@@ -56,13 +56,17 @@ class MS_dataHandler:
         logging.debug("cash flow url: %s", cash_flow_url)
 
 
-        print "requesting csv data : ", ticker
+        #print "requesting csv data : ", ticker
 
 
         result = self.retrieveCsv()
         if not result:
             logging.error("Error initializing data. skipping %s", self.ticker)
-            return None
+            self.initialized = False
+            return
+
+
+        self.initialized = True
 
 
         #print self.csv_files
@@ -77,9 +81,18 @@ class MS_dataHandler:
         '''returns the url to the key ratios from financials.morningstar.com
         '''
         #key racio url
-        kr_url1 = "http://financials.morningstar.com/ajax/exportKR2CSV.html?&callback=?&t="    #ticker gose here
-        kr_url2 = "&region=sgp&culture=en-US&cur=&order=asc"
+        #kr_url1 = "http://financials.morningstar.com/ajax/exportKR2CSV.html?&callback=?&t="    #ticker gose here
+        #kr_url2 = "&region=sgp&culture=en-US&cur=&order=asc"
+
+        #XNYS = nyse?
+        #so hard coded to NYSE for now?
+
+        kr_url1 = "http://financials.morningstar.com/ajax/exportKR2CSV.html?&callback=?&t=XNYS:"    #ticker gose here
+        kr_url2 = "&region=usa&culture=en-US&cur=&order=%22+orderby;"
+
+        #print kr_url1 + self.ticker + kr_url2
         return kr_url1 + self.ticker + kr_url2
+
 
 
     def getFinancialReportsURL(self, report_type):
@@ -115,7 +128,7 @@ class MS_dataHandler:
             self.download(self.csv_urls[key], csv_full_path)
 
             #TODO: error check here by simply checking downloaded file size for now.
-            if os.path.getsize(csv_full_path) > 0:
+            if os.path.getsize(csv_full_path) > 300:
                 self.csv_files[key] = csv_full_path
                 continue
             else:
@@ -137,6 +150,75 @@ class MS_dataHandler:
             pass
 
 
+    def parseIncomeStatement(self):
+        #print "parsing and creating income statement data ..."
+        ms_parser._parseIncomeStatement(self)
+
+    def parseBalanceSheet(self):
+        #print "parsing and creating balance sheet data ..."
+        ms_parser._parseBalanceSheet(self)
+
+    def parseCashFlow(self):
+        #print "parsing and creating cash flow data ..."
+        ms_parser._parseCashFlow(self)
+
+    def parseKeyRatios(self):
+        #print "parsing and creating key ratios data ..."
+        ms_parser._parseKeyRatios(self)
+
+
+    def getFinancialData(self, statement_type, key, item):
+        '''test
+        '''
+        if statement_type == "balance_sheet":
+            if hasattr(self, 'parsed_bs_data'):
+                try:
+                    return self.parsed_bs_data[key][item]
+                except:
+                    print "Error getting data for key: ", key, item
+                    return False
+            else:
+                print "no parsed balance sheet data found. Please parse data. handler.parseBalanceSheet()"
+                return False
+
+        if statement_type == "income_statement":
+            if hasattr(self, 'parsed_is_data'):
+                try:
+                    return self.parsed_is_data[key][item]
+                except:
+                    print "Error getting data for key: ", key, item
+                    return False
+            else:
+                print "no parsed income statement data found. Please parse data. handler.parseIncomeStatement()"
+                return False
+
+
+        if statement_type == "cash_flow":
+            if hasattr(self, 'parsed_cf_data'):
+                try:
+                    return self.parsed_cf_data[key][item]
+                except:
+                    print "Error getting data for key: ", key, item
+                    return False
+            else:
+                print "no parsed cash flow data found. Please parse data. handler.parseCashFlow()"
+                return False
+
+
+        if statement_type == "key_ratios":
+            if hasattr(self, 'parsed_kr_data'):
+                try:
+                    return self.parsed_kr_data[key][item]
+                except:
+                    print "Error getting data for key: ", key, item
+                    return False
+            else:
+                print "no parsed key ratios data found. Please parse data. handler.parseKeyRatios()"
+                return False
+
+
+
+
     def getData(self):
         '''this is the main function to aquire data from the handler.
         '''
@@ -146,51 +228,6 @@ class MS_dataHandler:
         '''check the csv file.
         '''
         pass
-
-
-    def parseIncomeStatement(self):
-        print "parsing and creating income statement data ..."
-        ms_parser._parseIncomeStatement(self)
-
-    def parseBalanceSheet(self):
-        print "parsing and creating balance sheet data ..."
-        ms_parser._parseBalanceSheet(self)
-
-    def parseCashFlow(self):
-        print "parsing and creating cash flow data ..."
-        ms_parser._parseCashFlow(self)
-
-
-
-    def getFinancialData(self, statement_type, key, item):
-
-        if statement_type == "balance_sheet":
-            if hasattr(self, 'parsed_bs_data'):
-                #try get the data
-                return self.parsed_bs_data[key][item]
-                #except
-            else:
-                print "no parsed balance sheet data found. Please parse data. handler.parseBalanceSheet()"
-                return False
-
-        if statement_type == "income_statement":
-            if hasattr(self, 'parsed_is_data'):
-                return self.parsed_is_data[key][item]
-
-            else:
-                print "no parsed income statement data found. Please parse data. handler.parseIncomeStatement()"
-                return False
-
-
-        if statement_type == "cash_flow":
-            if hasattr(self, 'parsed_cf_data'):
-                return self.parsed_cf_data[key][item]
-
-            else:
-                print "no parsed cash flow data found. Please parse data. handler.parseCashFlow()"
-                return False
-
-
 
 
 
