@@ -1,39 +1,6 @@
-from ms_data import MS_dataHandler
-
-#list of stocks for test
-#stocks = ["DWA"]
-
-'''
-#import json
-import urllib
-import simplejson as json
-import pprint
-
-import ast
-
-exchange="NYSE"
-retrieve_count = "5"
-
-testfile = "/USERS/chichang/Downloads/e.txt"
-url = "https://www.google.com/finance?output=json&start=0&amp;num=3&noIL=1&q=[%28exchange%20%3D%3D%20%22"+exchange+"%22%29%20%26%20%28dividend_next_year%20%3E%3D%200%29%20%26%20%28dividend_next_year%20%3C%3D%201.46%29%20%26%20%28price_to_sales_trailing_12months%20%3C%3D%20850%29]&restype=company&ei=BjE7VZmkG8XwuASFn4CoDg"
-
-url_data = urllib.urlretrieve(url, testfile)
-
-
-f = open(testfile, 'r')
-texts = f.read()
-print texts
-texts_dict = ast.literal_eval(texts)
-print texts_dict
-
-
-all_ticker = []
-for i in texts_dict["searchresults"]:
-    all_ticker.append(i["ticker"])
-print all_ticker
-'''
 stock = ["ACN"]
-stocks = ["NFLX", "TESTING", "C", "DWA", "KO", "FLY"]
+
+stocks = ["NFLX", "TESTING", "C", "DWA", "KO", "FLY", "A"]
 
 sp500_2015_10 = [
     'A', 'AA', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACE', 'ACN', 'ADBE',
@@ -85,38 +52,3 @@ sp500_2015_10 = [
     'WAT', 'WBA', 'WDC', 'WEC', 'WFC', 'WFM', 'WHR', 'WM', 'WMB', 'WMT', 'WRK',
     'WU', 'WY', 'WYN', 'WYNN', 'XEC', 'XEL', 'XL', 'XLNX', 'XOM', 'XRAY', 'XRX',
     'XYL', 'YHOO', 'YUM', 'ZBH', 'ZION', 'ZTS']
-
-
-
-for i in sp500_2015_10:
-
-	handler = MS_dataHandler(ticker = i)
-
-	#if hander is initialized without error
-	if handler.initialized:
-
-		handler.parseBalanceSheet()
-		handler.parseKeyRatios()
-
-		latest_total_asset = handler.getFinancialData("balance_sheet", "2015", "Total assets")
-		latest_current_ratio= handler.getFinancialData("key_ratios", "2015", "Current Ratio")
-		latest_debt_equity = handler.getFinancialData("key_ratios", "2015", "Debt/Equity")
-
-		if latest_debt_equity:
-			latest_debt_equity = float(latest_debt_equity)
-		if latest_current_ratio:
-			latest_current_ratio = float(latest_current_ratio)
-		#?? does None means no debt??? check.
-		#if latest_debt_equity and latest_current_ratio:
-		if latest_debt_equity < 0.5:
-			if latest_current_ratio > 1.5:
-				print "+----------------------------------------------------------"
-				print "|	",i
-				print "+----------------------------------------------------------"
-				print "|	Current Ratio: ", latest_current_ratio
-				print "|	Debt/Equity: Ratio: ", latest_debt_equity
-				print "+----------------------------------------------------------"
-				print "\n"
-
-	else:
-		pass

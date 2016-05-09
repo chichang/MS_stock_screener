@@ -7,36 +7,54 @@ import logging
 import time
 import csv
 
+from globals import *
 import ms_parser
 
-class MS_dataHandler:
 
-    def __init__(self, ticker):
+def mapExchange(exchange):
+    em = dict(
+        NYSE = "XNYS",
+        NASDAQ="XNAS"
+        )
+
+    return em[exchange]
+
+
+class MS_stockHandler(object):
+
+    def __init__(self, google_stock_dict_data):
         '''Constructs the handler instance.
 
         useage:
-
+        Attributes:
+            title (str): stock title.
+            ticker (str): stock ticker simble.
+            exchange (str): the exchange the stock is listed.
+            id (int): id used in the google database.
+        Args:
+            google_stock_dict_data: a dictionary for a stock from google api.
         '''
 
-        #print "initial data handler for: ", ticker
-
-        logging.info("initialize data from financials.morningstar.com  ticker: %s", ticker)
-
-        #ticker
-        self.ticker = ticker
+        self.title = google_stock_dict_data["title"]
+        self.ticker = google_stock_dict_data["ticker"]
+        self.exchange = google_stock_dict_data["exchange"]
+        self.id = int(google_stock_dict_data["id"])
         self.csv_urls = dict()
         self.csv_files = dict()
-        
-        #project dir.  TODO: use current working dir. hard code for dev now.
-        self.temp_csv_dir = "/USERS/chichang/Documents/temp_csv/"+ticker.lower()
-        #create the temp dir for csv files
-        logging.debug("making directory for csv files: %s", self.temp_csv_dir)
-        self.makeCsvTempDir()
 
         #statement type
         income_statement_str = "is"     #income statement
         balance_sheet_str = "bs"        #balance sheet
         cash_flow_str = "cf"            #cash flow statement
+
+        #project dir.  TODO: use current working dir. hard code for dev now.
+        self.temp_csv_dir = TEMP_DIR + self.ticker.lower()
+
+        #create the temp dir for csv files
+        logging.debug("making directory for csv files: %s", self.temp_csv_dir)
+        self.makeCsvTempDir()
+        #if not self.makeCsvTempDir():
+            #logging.error("error creating directory: %s", self.temp_csv_dir)
 
         #financials.morningstar.com urls
         key_ratios_url = self.getKeyRatiosURL()
@@ -55,26 +73,20 @@ class MS_dataHandler:
         self.csv_urls["cash_flow"] = cash_flow_url
         logging.debug("cash flow url: %s", cash_flow_url)
 
-
-        #print "requesting csv data : ", ticker
-
-
+        #download all csv data from financials.morningstar.com
         result = self.retrieveCsv()
         if not result:
             logging.error("Error initializing data. skipping %s", self.ticker)
             self.initialized = False
             return
 
-
+        #init success
         self.initialized = True
-
-
-        #print self.csv_files
 
     def __str__(self):
         '''get basic info for the data.
         '''
-        return str("MS_dataHandler for "+self.ticker)
+        return "handler for ticker: %s title: %s"%(self.ticker, self.title)
 
 
     def getKeyRatiosURL(self):
@@ -87,12 +99,13 @@ class MS_dataHandler:
         #XNYS = nyse?
         #so hard coded to NYSE for now?
 
-        kr_url1 = "http://financials.morningstar.com/ajax/exportKR2CSV.html?&callback=?&t=XNYS:"    #ticker gose here
-        kr_url2 = "&region=usa&culture=en-US&cur=&order=%22+orderby;"
+
+        kr_url1 = "http://financials.morningstar.com/ajax/exportKR2CSV.html?&callback=?&t="
+        kr_url2 = ":"    #ticker gose here
+        kr_url3 = "&region=usa&culture=en-US&cur=&order=%22+orderby;"
 
         #print kr_url1 + self.ticker + kr_url2
-        return kr_url1 + self.ticker + kr_url2
-
+        return kr_url1 + mapExchange(self.exchange) + kr_url2 + self.ticker + kr_url3
 
 
     def getFinancialReportsURL(self, report_type):
@@ -100,9 +113,11 @@ class MS_dataHandler:
         '''
         #financial statements url
         fs_url1 = "http://financials.morningstar.com/ajax/ReportProcess4CSV.html?&t="    #ticker gose here
-        fs_url2 = "&region=usa&culture=en-US&cur=USD&reportType="   #report type goes here
-        fs_url3 = "&period=12&dataType=A&order=asc&columnYear=10&rounding=3&view=raw&r=337541&denominatorView=raw&number=3"
-        return fs_url1 + self.ticker + fs_url2 + report_type + fs_url3
+        fs_url2 = ":"
+        fs_url3 = "&region=usa&culture=en-US&cur=USD&reportType="   #report type goes here
+        fs_url4 = "&period=12&dataType=A&order=asc&columnYear=10&rounding=3&view=raw&r=337541&denominatorView=raw&number=3"
+
+        return fs_url1 + mapExchange(self.exchange) + fs_url2 + self.ticker + fs_url3 + report_type + fs_url4
 
 
     def makeCsvTempDir(self):
@@ -233,11 +248,6 @@ class MS_dataHandler:
 
 #test run
 #dwa_handler = MS_dataHandler(ticker="DWA")
-
-
-
-
-
 
 
 
