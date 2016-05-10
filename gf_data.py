@@ -1,6 +1,9 @@
 import urllib
+import urllib2
 import pprint
-import json
+import sys
+import threading
+import datetime
 import ast
 
 from globals import *
@@ -28,10 +31,48 @@ def retrieveStockList(exchange, retrieve_count=20):
 
 
 
-#all_ticker = []
-#for i in texts_dict:
-    #current_stock = MS_stock(i)
-    #print current_stock
-    
-    #all_ticker.append(i)
-#print all_ticker
+
+
+def getQuote(ticker):
+    '''use this function to get current market quote and the exchange the stock is listed.
+    takes a stock ticker return a dictionary with the follwing data structure:
+
+    Args:
+        ticker (str): The ticker of the stock.
+
+    Usage:
+        getQuote('dis')
+
+    Returns:
+        returns a dictionary of data, False otherwise.
+
+        {
+            'quote': '106.65', 
+            'ticker': 'DIS', 
+            'exchange': 'NYSE'
+        }
+
+    '''
+    #threading.Timer(1.0, getquote).start()
+    target_url = "http://finance.google.com/finance/info?client=ig&q=" + ticker.lower()
+    try:
+        data = urllib2.urlopen(target_url)
+    except:
+        print "error getting stock quote from url: ", target_url
+        return False
+
+    data_dict = ast.literal_eval(data.read()[4:])[0]
+
+    #pprint.pprint(data_dict)
+    #timestamp = st = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+    #print  ticker + " --- " + timestamp + " --- " + data.readlines()[8].replace(',"l_cur" : ', "").replace('"',"")
+    try:
+        stock_quote_dict = dict(    ticker=data_dict["t"], 
+                                    exchange=data_dict["e"], 
+                                    quote=data_dict["l"])
+
+    except:
+        print "error getting stock quote from ticker: ", ticker
+        return False
+
+    return stock_quote_dict
