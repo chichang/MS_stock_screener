@@ -1,3 +1,6 @@
+'''parsers takes MS_dataHandler as argument and parse the csvs' to
+    initialize data for the handler.
+'''
 
 import urllib2
 import urllib
