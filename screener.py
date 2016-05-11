@@ -31,6 +31,7 @@ Attributes:
 from ms_data import MS_stockHandler
 import gf_data
 from globals import *
+import math
 
 
 
@@ -38,7 +39,7 @@ from globals import *
 stock_exchange = "NYSE"
 retrieve_num = 3
 
-test_stocks = None #["FB", "DWA", "DIS"]
+test_stocks = ["AXP","DIS","KO"]
 
 
 #get the stock data
@@ -88,6 +89,28 @@ for stock in stocks_to_analyze:
         print "Dividends USD".ljust(50), dividen
         print "Earnings Per Share USD".ljust(50),erngins_ps
 
+        #getting value for calculating intrinsit value
+        current_year = "2015"
+        years = 10
+        old_year = str(int(current_year) - (years-1))
+        current_book_value = handler.getFinancialData("key_ratios", current_year, "Book Value Per Share USD")
+        old_book_value = handler.getFinancialData("key_ratios", old_year , "Book Value Per Share USD")
+        current_dividend = handler.getFinancialData("key_ratios", "2015", "Dividends USD")
+        treasure_rate = 1.77/100       
+        #print current_dividend
+        #print current_book_value
+        #print old_book_value
+
+        #calculate intrinsit value
+        avg_book_value_rate= (math.pow((float(current_book_value)/float(old_book_value)),(1.0/(years-1)))-1)*100
+        #print avg_book_value_rate
+        parr = float(current_book_value)*(math.pow((1+(avg_book_value_rate/100)),years))
+        #print parr
+        extra = math.pow((1+(treasure_rate)),years)
+        #print extra
+        intrinsic_value = float(current_dividend)*(1-(1/extra))/treasure_rate+parr/extra
+        print "Intrinsic Value: ", intrinsic_value 
+
 
         #?? does None means no debt??? check.
 
@@ -99,6 +122,7 @@ for stock in stocks_to_analyze:
                 print "+----------------------------------------------------------"
                 print "|    Current Ratio: ", latest_current_ratio
                 print "|    Debt/Equity: Ratio: ", latest_debt_equity
+                print "|    Intrinsit Value: ", intrinsit_value
                 print "+----------------------------------------------------------"
                 print "\n"
 
@@ -108,6 +132,7 @@ for stock in stocks_to_analyze:
                 result_str += "+----------------------------------------------------------"+"\n"
                 result_str += "|    Current Ratio: "+ str(latest_current_ratio)+"\n"
                 result_str += "|    Debt/Equity: Ratio: "+ str(latest_debt_equity)+"\n"
+                result_str += "|    Intrinsit Value: "+ str(intrinsit_value)+"\n"
                 result_str += "+----------------------------------------------------------"+"\n"
                 result_str += "\n"+"\n"
     else:
