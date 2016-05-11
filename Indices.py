@@ -1,4 +1,4 @@
-watch_list = ["ACN"]
+watch_list = ["PFXF", "PFF", "SPFF", "KBWY"]
 
 stocks = ["NFLX", "TESTING", "C", "DWA", "KO", "FLY", "A"]
 

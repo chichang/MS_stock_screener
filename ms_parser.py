@@ -321,6 +321,5 @@ def _parseKeyRatios(data_handler, statement_type = "annual", period = 11):    #n
                         #data_handler.parsed_kr_data[data[YEAR_MONTH_ROW][idx_col]][data_key]=item_data
                         #data[YEAR_MONTH_ROW][idx_col]
                         #print data_key, "date:", data[YEAR_MONTH_ROW][idx_col], "value: ", data[idx_row][idx_col]
-    print data_handler.parsed_kr_data.keys()
-
+    #print data_handler.parsed_kr_data.keys()
     #pprint.pprint(data_handler.parsed_kr_data)

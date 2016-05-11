@@ -49,7 +49,8 @@ def getQuote(ticker):
         {
             'quote': '106.65', 
             'ticker': 'DIS', 
-            'exchange': 'NYSE'
+            'exchange': 'NYSE',
+            'title: ''
         }
 
     '''
@@ -67,12 +68,15 @@ def getQuote(ticker):
     #timestamp = st = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
     #print  ticker + " --- " + timestamp + " --- " + data.readlines()[8].replace(',"l_cur" : ', "").replace('"',"")
     try:
-        stock_quote_dict = dict(    ticker=data_dict["t"], 
+        stock_quote_dict = dict(    id=data_dict["id"], 
+                                    ticker=data_dict["t"], 
                                     exchange=data_dict["e"], 
-                                    quote=data_dict["l"])
+                                    quote=data_dict["l"],
+                                    title="none")    #TODO: find a way to get title.
 
-    except:
+    except Exception, e:
         print "error getting stock quote from ticker: ", ticker
+        print e
         return False
-
+    #print stock_quote_dict
     return stock_quote_dict

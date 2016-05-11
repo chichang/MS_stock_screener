@@ -33,12 +33,22 @@ import gf_data
 from globals import *
 
 
+
 #from exchange to get a "random" umber of stocks. TODO: put these as commandline args.
 stock_exchange = "NYSE"
 retrieve_num = 3
 
+test_stocks = None #["FB", "DWA", "DIS"]
+
+
 #get the stock data
-stocks = gf_data.retrieveStockList(stock_exchange, retrieve_num)
+stocks_to_analyze = []
+if test_stocks:
+    for i in test_stocks:
+        stocks_to_analyze.append(gf_data.getQuote(i))
+else:
+    stocks_to_analyze = gf_data.retrieveStockList(stock_exchange, retrieve_num)
+
 
 #file to save the filtered restults.
 result_file = TEMP_DIR+"test_result.txt"
@@ -46,7 +56,7 @@ f = open(result_file, 'w')
 result_str = " - Filtered result by MS_stock_screener - \n"
 
 #going through each stock aquired.
-for stock in stocks:
+for stock in stocks_to_analyze:
 
     #create handler for the stock
     handler = MS_stockHandler(google_stock_dict_data = stock)
@@ -68,16 +78,18 @@ for stock in stocks:
         if latest_current_ratio:
             latest_current_ratio = float(latest_current_ratio)
 
-
+        # test getting some values
         latest_total_asset = handler.getFinancialData("balance_sheet", "2015", "Total assets")
         book_value_ps = handler.getFinancialData("key_ratios", "2015", "Book Value Per Share USD")
         dividen = handler.getFinancialData("key_ratios", "2015", "Dividends USD")
         erngins_ps = handler.getFinancialData("key_ratios", "2015", "Earnings Per Share USD")
-        print book_value_ps, dividen, erngins_ps
-        #?? does None means no debt??? check.
-        #if latest_debt_equity and latest_current_ratio:
-        #if latest_debt_equity and latest_current_ratio:
+        print "Total assets".ljust(50) ,latest_total_asset
+        print "Book Value Per Share USD".ljust(50), book_value_ps
+        print "Dividends USD".ljust(50), dividen
+        print "Earnings Per Share USD".ljust(50),erngins_ps
 
+
+        #?? does None means no debt??? check.
 
         #perform some calcalations here ....
         if latest_debt_equity < 0.5:
