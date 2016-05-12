@@ -42,7 +42,7 @@ import csv
 from globals import *
 import ms_parser
 
-
+#TODO: get all exchanges in here
 def mapExchange(exchange):
     em = dict(
         NYSE = "XNYS",

@@ -8,7 +8,7 @@ import time
 import csv
 import pprint
 
-ticker="DWA" #78096  2412.034008
+ticker="DWA" #78096  2412.034008 http://www.sectorspdr.com/sectorspdr/
 temp_csv = "/USERS/chichang/Documents/temp_csv/dwa/dwa_balance_sheet.csv"
 
 

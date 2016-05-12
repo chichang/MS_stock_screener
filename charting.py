@@ -1,7 +1,4 @@
 #    charting.py
-import sys
-sys.path.append("/USERS/chichang/workspace/3rd_party/MS_stock_screener")
-
 from Tkinter import *
 from globals import *
 from ms_data import MS_stockHandler
@@ -18,7 +15,7 @@ if handler.initialized:
     handler.parseKeyRatios()
 '''
 
-#helper functions
+#helper functions for draw Chart
 def mapit(minv, maxv, t):
     r = maxv-minv
     h = t-minv
@@ -36,15 +33,16 @@ def getmaxmin(val_dict):
                 min = v
     return max, min
 
-def drawChart(handler):
+def drawChart(handler, data_to_chart = "Book Value Per Share USD"):
+
 
     latest_year = 2015  #TODO: clean this up. hard coded.
-    data_to_chart = "Book Value Per Share USD"
+    #data_to_chart = "Book Value Per Share USD"
 
     price_list = dict()
     for i in range (0, 10):
         year = latest_year - i
-        bps = handler.getFinancialData("key_ratios", str(year), "Book Value Per Share USD")
+        bps = handler.getFinancialData("key_ratios", str(year), data_to_chart)
         if bps == None:
             price_list[str(year)] = None
         else:
@@ -55,8 +53,8 @@ def drawChart(handler):
     #get max and min value in the list
     max_val, min_val = getmaxmin(price_list)
     print max_val, min_val
-    max_val = max_val*1.1   #a simple mult her for top margin
-    min_val = min_val*0.8   #a simple mult her for bottom margin
+    max_val = max_val*1.1   #a simple mult here for top spacing
+    min_val = min_val*0.8   #a simple mult here for bottom spacing
 
     #variables for ui
     m = 20
