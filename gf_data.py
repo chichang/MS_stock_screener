@@ -30,9 +30,6 @@ def retrieveStockList(exchange, retrieve_count=20):
     return texts_dict["searchresults"]
 
 
-
-
-
 def getQuote(ticker):
     '''use this function to get current market quote and the exchange the stock is listed.
     takes a stock ticker return a dictionary with the follwing data structure:

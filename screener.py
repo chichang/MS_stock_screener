@@ -27,18 +27,19 @@ Attributes:
    http://google.github.io/styleguide/pyguide.html
 
 """
-
+from globals import *
 from ms_data import MS_stockHandler
 import gf_data
-from globals import *
+from charting import drawChart
+
 
 
 
 #from exchange to get a "random" umber of stocks. TODO: put these as commandline args.
 stock_exchange = "NYSE"
-retrieve_num = 3
+retrieve_num = 20
 
-test_stocks = None #["FB", "DWA", "DIS"]
+test_stocks =None # ["FB", "DWA", "DIS"]
 
 
 #get the stock data
@@ -110,6 +111,9 @@ for stock in stocks_to_analyze:
                 result_str += "|    Debt/Equity: Ratio: "+ str(latest_debt_equity)+"\n"
                 result_str += "+----------------------------------------------------------"+"\n"
                 result_str += "\n"+"\n"
+
+                #test charting
+                drawChart(handler)
     else:
         pass
 
