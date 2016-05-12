@@ -5,6 +5,7 @@ import sys
 import threading
 import datetime
 import ast
+import random
 
 from globals import *
 
@@ -18,7 +19,8 @@ except:
 def retrieveStockList(exchange, retrieve_count=20):
     '''download a list of stocks from google finance api TODO: better error handling.
     '''
-    url = "https://www.google.com/finance?output=json&start=0&amp&num="+str(retrieve_count)+"&noIL=1&q=[%28exchange%20%3D%3D%20%22"+exchange+"%22%29%20%26%20%28dividend_next_year%20%3E%3D%200%29%20%26%20%28dividend_next_year%20%3C%3D%201.46%29%20%26%20%28price_to_sales_trailing_12months%20%3C%3D%20850%29]&restype=company&ei=BjE7VZmkG8XwuASFn4CoDg"
+    retrieve_all = 1000
+    url = "https://www.google.com/finance?output=json&start=0&amp&num="+str(retrieve_all)+"&noIL=1&q=[%28exchange%20%3D%3D%20%22"+exchange+"%22%29%20%26%20%28dividend_next_year%20%3E%3D%200%29%20%26%20%28dividend_next_year%20%3C%3D%201.46%29%20%26%20%28price_to_sales_trailing_12months%20%3C%3D%20850%29]&restype=company&ei=BjE7VZmkG8XwuASFn4CoDg"
     #download
     url_data = urllib.urlretrieve(url, testfile)
     #convert to dict. get json working if possible.
@@ -27,8 +29,12 @@ def retrieveStockList(exchange, retrieve_count=20):
     #print texts
     texts_dict = ast.literal_eval(texts)
     #pprint.pprint(texts_dict)
-    return texts_dict["searchresults"]
-
+    search_result = texts_dict["searchresults"]
+    result = []
+    for i in range(1, retrieve_count):
+        pick = random.choice(search_result)
+        result.append(pick)
+    return result
 
 
 
