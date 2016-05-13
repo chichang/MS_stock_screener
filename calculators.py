@@ -21,12 +21,14 @@ def bb_ivalue(handler,latestYear,rate):
         if current_dividend == None:
             print "This stock doesn't issue dividend."
             current_dividend = 0.0
-        avg_book_value_rate= (math.pow((float(current_book_value)/float(old_book_value)),(1.0/(years-1)))-1)*100
-        parr = float(current_book_value)*(math.pow((1+(avg_book_value_rate/100)),years))
-        extra = math.pow((1+(treasure_rate)),years)
-        intrinsic_value = float(current_dividend)*(1-(1/extra))/treasure_rate+parr/extra
-        return intrinsic_value
-
+        try:
+            avg_book_value_rate= (math.pow((float(current_book_value)/float(old_book_value)),(1.0/(years-1)))-1)*100
+            parr = float(current_book_value)*(math.pow((1+(avg_book_value_rate/100)),years))
+            extra = math.pow((1+(treasure_rate)),years)
+            intrinsic_value = float(current_dividend)*(1-(1/extra))/treasure_rate+parr/extra
+            return intrinsic_value
+        except Exception, e:
+            print "Error calculate intrinsic value: ", e
     
 
 
