@@ -1,5 +1,6 @@
 #example google style docstring
 #http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
+##78096  2412.034008 http://www.sectorspdr.com/sectorspdr/
 """Example Google style docstrings.
 
 This module demonstrates documentation as specified by the `Google Python
@@ -35,15 +36,22 @@ import os
 import errno
 import urllib
 import urllib2
-import logging
 import time
 import csv
-
 from globals import *
 import ms_parser
 
+#setup logger
+import logging
+from logger import setup_logging
+logger = logging.getLogger(__name__)
+setup_logging()
+
 
 def mapExchange(exchange):
+    '''map the exchange name to to corisponding string used in urls.
+
+    '''
     em = dict(
         NYSE = "XNYS",
         NASDAQ="XNAS"
@@ -53,7 +61,6 @@ def mapExchange(exchange):
 
 
 class MS_stockHandler(object):
-
     def __init__(self, google_stock_dict_data):
         '''Constructs the handler instance.
 
@@ -66,9 +73,7 @@ class MS_stockHandler(object):
         Args:
             google_stock_dict_data: a dictionary for a stock from google api.
         '''
-
-        print google_stock_dict_data["ticker"]
-
+        logger.debug("initializing handler with: %s", google_stock_dict_data)
         self.title = google_stock_dict_data["title"]
         self.ticker = google_stock_dict_data["ticker"]
         self.exchange = google_stock_dict_data["exchange"]
@@ -85,60 +90,58 @@ class MS_stockHandler(object):
         #project dir.  TODO: use current working dir. hard code for dev now.
         self.temp_csv_dir = TEMP_DIR + self.ticker.lower()
 
+        logger.info("Initializing data for %s", self.ticker)
+
         #create the temp dir for csv files
-        logging.debug("making directory for csv files: %s", self.temp_csv_dir)
+        logger.debug("Creating directory for csv files: %s", self.temp_csv_dir)
         self.makeCsvTempDir()
         #if not self.makeCsvTempDir():
-            #logging.error("error creating directory: %s", self.temp_csv_dir)
+            #logger.error("error creating directory: %s", self.temp_csv_dir)
 
         #financials.morningstar.com urls
         key_ratios_url = self.getKeyRatiosURL()
         self.csv_urls["key_ratios"] = key_ratios_url
-        logging.debug("key ratios url: %s", key_ratios_url)
+        logger.debug("key ratios url: %s", key_ratios_url)
 
         income_statement_url = self.getFinancialReportsURL(report_type=income_statement_str)
         self.csv_urls["income_statement"] = income_statement_url
-        logging.debug("income statement url: %s", income_statement_url)
+        logger.debug("income statement url: %s", income_statement_url)
 
         balance_sheet_url = self.getFinancialReportsURL(report_type=balance_sheet_str)
         self.csv_urls["balance_sheet"] = balance_sheet_url
-        logging.debug("balance sheet url: %s", balance_sheet_url)
+        logger.debug("balance sheet url: %s", balance_sheet_url)
 
         cash_flow_url = self.getFinancialReportsURL(report_type=cash_flow_str)
         self.csv_urls["cash_flow"] = cash_flow_url
-        logging.debug("cash flow url: %s", cash_flow_url)
+        logger.debug("cash flow url: %s", cash_flow_url)
 
         #download all csv data from financials.morningstar.com
         result = self.retrieveCsv()
+
         if not result:
-            logging.error("Error initializing data. skipping %s", self.ticker)
+            logger.warning("Fail to initializing csv data. skipping %s", self.ticker)
             self.initialized = False
             return
 
         #init success
+        logger.info("data handler initialized for %s", self.ticker)
         self.initialized = True
 
+
     def __str__(self):
-        '''get basic info for the data.
+        '''get basic info for the handler.
         '''
-        return "handler for ticker: %s title: %s"%(self.ticker, self.title)
+        return "data handler for ticker: %s title: %s"%(self.ticker, self.title)
 
 
     def getKeyRatiosURL(self):
         '''returns the url to the key ratios from financials.morningstar.com
         '''
         #key racio url
-        #kr_url1 = "http://financials.morningstar.com/ajax/exportKR2CSV.html?&callback=?&t="    #ticker gose here
-        #kr_url2 = "&region=sgp&culture=en-US&cur=&order=asc"
-
-        #XNYS = nyse?
-        #so hard coded to NYSE for now?
-
         kr_url1 = "http://financials.morningstar.com/ajax/exportKR2CSV.html?&callback=?&t="
         kr_url2 = ":"    #ticker gose here
         kr_url3 = "&region=usa&culture=en-US&cur=&order=%22+orderby;"
 
-        #print kr_url1 + self.ticker + kr_url2
         return kr_url1 + mapExchange(self.exchange) + kr_url2 + self.ticker + kr_url3
 
 
@@ -150,7 +153,7 @@ class MS_stockHandler(object):
         fs_url2 = ":"
         fs_url3 = "&region=usa&culture=en-US&cur=USD&reportType="   #report type goes here
         fs_url4 = "&period=12&dataType=A&order=asc&columnYear=10&rounding=3&view=raw&r=337541&denominatorView=raw&number=3"
-
+        
         return fs_url1 + mapExchange(self.exchange) + fs_url2 + self.ticker + fs_url3 + report_type + fs_url4
 
 
@@ -160,10 +163,12 @@ class MS_stockHandler(object):
         '''
         try:
             os.makedirs(self.temp_csv_dir)
-
+            logger.debug("temp folder created: %s", self.temp_csv_dir)
         except OSError , e:
             if e.errno != errno.EEXIST:
+                logger.error("error creating dir: %s", self.temp_csv_dir)
                 raise  # raises the error again
+
 
     def retrieveCsv(self):
         '''retrieve all csv files.
@@ -173,7 +178,7 @@ class MS_stockHandler(object):
             csv_file_name = "%s_%s.csv" % (self.ticker.lower(), key)
             csv_full_path = os.path.join(self.temp_csv_dir, csv_file_name)
 
-            logging.debug("retrieving data : %s", csv_full_path)
+            logger.debug("retrieving csv data from url: %s", csv_full_path)
             self.download(self.csv_urls[key], csv_full_path)
 
             #TODO: error check here by simply checking downloaded file size for now.
@@ -181,12 +186,13 @@ class MS_stockHandler(object):
                 self.csv_files[key] = csv_full_path
                 continue
             else:
-                logging.error("Error retrieving data for %s", self.ticker)
+                logger.warning("Fail to retrieve csv data for %s", self.ticker)
                 return False
                 break
 
         #all csv downloaded
         return True
+
 
     def download(self, url, dest):
         '''downlads file.
@@ -195,77 +201,93 @@ class MS_stockHandler(object):
         try:
             #retrieve the url.
             urllib.urlretrieve(url, dest)
-        except:
-            pass
+
+        except Exception, e:
+            logger.error('url retrieve failed.', exc_info=True)
 
 
     def parseIncomeStatement(self):
-        #print "parsing and creating income statement data ..."
+        '''pass to the parser to parse income statement data.
+        parsed data will be stored at newly created attribute: self.parsed_is_data
+        '''
         ms_parser._parseIncomeStatement(self)
 
+
     def parseBalanceSheet(self):
-        #print "parsing and creating balance sheet data ..."
+        '''pass to the parser to parse balancd sheet data.
+        parsed data will be stored at newly created attribute: self.parsed_bs_data
+        '''
         ms_parser._parseBalanceSheet(self)
 
+
     def parseCashFlow(self):
-        #print "parsing and creating cash flow data ..."
+        '''pass to the parser to parse cash flow data.
+        parsed data will be stored at newly created attribute: self.parsed_cf_data
+        '''
         ms_parser._parseCashFlow(self)
 
+
     def parseKeyRatios(self):
-        #print "parsing and creating key ratios data ..."
+        '''pass to the parser to parse key ratios data.
+        parsed data will be stored at newly created attribute: self.parsed_kr_data
+        '''
         ms_parser._parseKeyRatios(self)
 
-
     def getFinancialData(self, statement_type, key, item):
-        '''test
+        '''basic function for aquiring data from handler.
+        data must be parsed first befor getting them.
         '''
+        logger.debug("getting %s from %s. key: %s" %(item, statement_type, key))
+
         if statement_type == "balance_sheet":
             if hasattr(self, 'parsed_bs_data'):
                 try:
                     return self.parsed_bs_data[key][item]
                 except:
-                    print "Error getting data for key: ", key, item
+                    logger.warning("fail getting data for: ", key, item)
                     return False
             else:
-                print "no parsed balance sheet data found. Please parse data. handler.parseBalanceSheet()"
+                logger.info("no parsed balance sheet data found. Please parse data. handler.parseBalanceSheet()")
                 return False
 
-        if statement_type == "income_statement":
+        elif statement_type == "income_statement":
             if hasattr(self, 'parsed_is_data'):
                 try:
                     return self.parsed_is_data[key][item]
                 except:
-                    print "Error getting data for key: ", key, item
+                    logger.warning("fail getting data for: ", key, item)
                     return False
             else:
-                print "no parsed income statement data found. Please parse data. handler.parseIncomeStatement()"
+                logger.info("no parsed income statement data found. Please parse data. handler.parseIncomeStatement()")
                 return False
 
 
-        if statement_type == "cash_flow":
+        elif statement_type == "cash_flow":
             if hasattr(self, 'parsed_cf_data'):
                 try:
                     return self.parsed_cf_data[key][item]
                 except:
-                    print "Error getting data for key: ", key, item
+                    logger.warning("fail getting data for: ", key, item)
                     return False
             else:
-                print "no parsed cash flow data found. Please parse data. handler.parseCashFlow()"
+                logger.info("no parsed cash flow data found. Please parse data. handler.parseCashFlow()")
                 return False
 
 
-        if statement_type == "key_ratios":
+        elif statement_type == "key_ratios":
             if hasattr(self, 'parsed_kr_data'):
                 try:
                     return self.parsed_kr_data[key][item]
                 except:
-                    print "Error getting data for key: ", key, item
+                    logger.warning("fail getting data for: ", key, item)
                     return False
             else:
-                print "no parsed key ratios data found. Please parse data. handler.parseKeyRatios()"
+                logger.info("no parsed key ratios data found. Please parse data. handler.parseKeyRatios()")
                 return False
 
-
+        else:
+            logger.warning("worng statemet type. %s please specify the currect statment type.", statement_type)
+            return False
 
 
     def getData(self):
@@ -273,95 +295,8 @@ class MS_stockHandler(object):
         '''
         pass
 
+
     def validateCsv(self):
         '''check the csv file.
         '''
         pass
-
-
-
-#test run
-#dwa_handler = MS_dataHandler(ticker="DWA")
-
-
-
-
-
-
-
-
-
-'''
-
-#urllib.urlretrieve(dataLink, temp_csv)
-
-with open(temp_csv, 'rb') as csvfile:
-    reader = csv.reader(csvfile)
-    for row in reader:
-        if len(row):
-            #print row[0]
-            if row[0] == 'R&D':
-                print "Net Income USD Mil: " + row[1]
-        #print(row['first_name'], row['last_name'])
-
-
-import json
-import urllib
-import pprint
-from bs4 import BeautifulSoup
-
-
-pp = pprint.PrettyPrinter(depth=6)
-ticker="DWA"
-report_type = "is"
-#:param report_type: Type of the report ('is', 'bs', 'cf').
-print 'http://financials.morningstar.com/ajax/ReportProcess4HtmlAjax.html?&t=' + ticker +'&region=usa&culture=en-US&cur=USD&reportType=' + report_type + '&period=12&dataType=A&order=asc&columnYear=5&rounding=3&view=raw'
-
-url = (r'http://financials.morningstar.com/ajax/' +r'ReportProcess4HtmlAjax.html?&t=' + ticker +r'&region=usa&culture=en-US&cur=USD' +r'&reportType=' + report_type + r'&period=12' +r'&dataType=A&order=asc&columnYear=5&rounding=3&view=raw')
-response = urllib.urlopen(url)
-json_text = response.read().decode('utf-8')
-json_data = json.loads(json_text)
-print json_data
-pp.pprint(json_data)
-
-print json_data['result']
-
-
-#result_soup = BeautifulSoup(json_data['result'], "html.parser")
-result_soup = BeautifulSoup(json_data['result'], "html.parser")
-print result_soup.find('div')
-
-left = result_soup.find('div', 'left').div
-print left
-
-main = soup.find('div', 'main').find('div', 'rf_table')
-print main
-
-
-
-
-
-
-import sys
-sys.path.append("/USERS/chichang/Downloads/python_dist/Python-2.7.11/Lib/site-packages")
-
-html_doc = """
-<html><head><title>The Dormouse's story</title></head>
-<body>
-<p class="title"><b>The Dormouse's story</b></p>
-
-<p class="story">Once upon a time there were three little sisters; and their names were
-<a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>,
-<a href="http://example.com/lacie" class="sister" id="link2">Lacie</a> and
-<a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
-and they lived at the bottom of a well.</p>
-
-<p class="story">...</p>
-"""
-
-
-soup = BeautifulSoup(html_doc, 'html.parser')
-print(soup.prettify())
-
-'''
-

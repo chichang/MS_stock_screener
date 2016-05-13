@@ -8,81 +8,84 @@ import time
 import csv
 import pprint
 
-ticker="DWA" #78096  2412.034008 http://www.sectorspdr.com/sectorspdr/
-temp_csv = "/USERS/chichang/Documents/temp_csv/dwa/dwa_balance_sheet.csv"
+#setup logger
+import logging
+from logger import setup_logging
+logger = logging.getLogger(__name__)
+setup_logging()
 
-
+#this a hard-coded variable to point to the row where years are located.
 YEAR_MONTH_ROW = 3
 
 class MS_dataParser:
     def __init__(self, data_handler):
         pass
 
-    '''
-    parse balance sheet csv.
-    this parser is based on the following csv data structure from http://financials.morningstar.com
-    balance sheet raw data structure:
+'''
+parse balance sheet csv.
+this parser is based on the following csv data structure from http://financials.morningstar.com
+balance sheet raw data structure:
 
-    \---Assets
-    |   +---Current assets
-    |   |    |
-    |   |    +---Cash
-    |   |    |    +---Cash and cash equivalents
-    |   |    |    +---Total cash
-    |   |    |
-    |   |    +---Receivables
-    |   |    +---Inventories
-    |   |    +---Prepaid expenses
-    |   |    +---Other current assets
-    |   |    +---Total current assets
-    |   |
-    |   +---Non-current assets
-    |   |    |
-    |   |    +---Property, plant and equipment
-    |   |    |    +---Gross property, plant and equipment
-    |   |    |    +---Accumulated Depreciation
-    |   |    |    +---Net property, plant and equipment
-    |   |    |
-    |   |    +---Equity and other investments
-    |   |    +---Goodwill
-    |   |    +---Intangible assets
-    |   |    +---Deferred income taxes
-    |   |    +---Other long-term assets
-    |   |    +---Total non-current assets
-    |   |
-    |   +---Total assets
-    |
-    \---Liabilities and stockholders' equity
-    |   +---Liabilities
-    |   |    |
-    |   |    +---Current liabilities
-    |   |    |    +---Accounts payable
-    |   |    |    +---Accrued liabilities
-    |   |    |    +---Deferred revenues
-    |   |    |    +---Other current liabilities
-    |   |    |    +---Total current liabilities
-    |   |    |
-    |   |    +---Non-current liabilities
-    |   |    |    +---Long-term debt
-    |   |    |    +---Minority interest
-    |   |    |    +---Other long-term liabilities
-    |   |    |    +---Total non-current liabilities
-    |   |    |
-    |   |    +---Total liabilities
-    |   |
-    |   +---Stockholders' equity
-    |   |    |
-    |   |    +---Common stock
-    |   |    +---Additional paid-in capital
-    |   |    +---Retained earnings
-    |   |    +---Treasury stock
-    |   |    +---Accumulated other comprehensive income
-    |   |    +---Total stockholders' equity
-    |   |
-    |   +---Total liabilities and stockholders' equity
-    +
+\---Assets
+|   +---Current assets
+|   |    |
+|   |    +---Cash
+|   |    |    +---Cash and cash equivalents
+|   |    |    +---Total cash
+|   |    |
+|   |    +---Receivables
+|   |    +---Inventories
+|   |    +---Prepaid expenses
+|   |    +---Other current assets
+|   |    +---Total current assets
+|   |
+|   +---Non-current assets
+|   |    |
+|   |    +---Property, plant and equipment
+|   |    |    +---Gross property, plant and equipment
+|   |    |    +---Accumulated Depreciation
+|   |    |    +---Net property, plant and equipment
+|   |    |
+|   |    +---Equity and other investments
+|   |    +---Goodwill
+|   |    +---Intangible assets
+|   |    +---Deferred income taxes
+|   |    +---Other long-term assets
+|   |    +---Total non-current assets
+|   |
+|   +---Total assets
+|
+\---Liabilities and stockholders' equity
+|   +---Liabilities
+|   |    |
+|   |    +---Current liabilities
+|   |    |    +---Accounts payable
+|   |    |    +---Accrued liabilities
+|   |    |    +---Deferred revenues
+|   |    |    +---Other current liabilities
+|   |    |    +---Total current liabilities
+|   |    |
+|   |    +---Non-current liabilities
+|   |    |    +---Long-term debt
+|   |    |    +---Minority interest
+|   |    |    +---Other long-term liabilities
+|   |    |    +---Total non-current liabilities
+|   |    |
+|   |    +---Total liabilities
+|   |
+|   +---Stockholders' equity
+|   |    |
+|   |    +---Common stock
+|   |    +---Additional paid-in capital
+|   |    +---Retained earnings
+|   |    +---Treasury stock
+|   |    +---Accumulated other comprehensive income
+|   |    +---Total stockholders' equity
+|   |
+|   +---Total liabilities and stockholders' equity
++
 
-    '''
+'''
 
 
 def _parseBalanceSheet(data_handler, statement_type = "annual", period = 5):    #need to pay for 10 years data.

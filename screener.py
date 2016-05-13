@@ -34,10 +34,19 @@ import gf_data
 from calculators import bb_ivalue
 from charting import drawChart
 
-#from exchange to get a "random" umber of stocks. TODO: put these as commandline args.
+#setup logger
+import logging
+from logger import setup_logging
+logger = logging.getLogger(__name__)
+setup_logging()
+
+
+logger.info("Starting Stock Screener.")
+
+#from exchange to get a "random" number of stocks. TODO: put these as commandline args.
 stock_exchange = "NYSE"
 retrieve_num = 20
-test_stocks = None#["AZO"]
+test_stocks = ["KO", "DWA", "DV"]
 
 #get the stock data
 stocks_to_analyze = []
@@ -69,7 +78,12 @@ for stock in stocks_to_analyze:
         non_risk_rate = 1.77
 
         bb_intrinsic_value = bb_ivalue(handler,latest_year,non_risk_rate)
-        #print data
+
+        #fits criteria? a class to handle criteria. and logic.
+        #something like
+        #   criteria = SearchCriteia(criteria="some_rule.txt")
+        #   fits_criteria = criteria.fitsCriteria(handler)
+
         print "+----------------------------------------------------------"
         print "|    "+handler.title + "  ".ljust(20) + "ticker: "+handler.ticker
         print "|    Market Value: ", handler.quote
@@ -82,7 +96,9 @@ for stock in stocks_to_analyze:
         print "\n"
 
         #test charting
-        drawChart(handler)
+        #drawChart(handler)
+
+
     """
         #get the numbers for calcalation.
         latest_current_ratio= handler.getFinancialData("key_ratios", "2015", "Current Ratio")
@@ -103,7 +119,6 @@ for stock in stocks_to_analyze:
         print "Dividends USD".ljust(50), dividen
         print "Earnings Per Share USD".ljust(50),erngins_ps
         print "Current market quote: ".ljust(50),stock["quote"]    #get this into the handler
-
 
         #getting value for calculating intrinsic value
         current_year = "2015"
