@@ -31,16 +31,13 @@ import math
 from globals import *
 from ms_data import MS_stockHandler
 import gf_data
+from calculators import bb_ivalue
 from charting import drawChart
 
-
 #from exchange to get a "random" umber of stocks. TODO: put these as commandline args.
-stock_exchange = "NASDAQ"
-retrieve_num = 30
-
-test_stocks = None #["KO", "DIS", "AIR"]
-
-
+stock_exchange = "NYSE"
+retrieve_num = 20
+test_stocks = None#["AZO"]
 
 #get the stock data
 stocks_to_analyze = []
@@ -52,7 +49,6 @@ if test_stocks:
 else:
     stocks_to_analyze = gf_data.retrieveStockList(stock_exchange, retrieve_num)
 
-
 #file to save the filtered restults.
 result_file = TEMP_DIR+"test_result.txt"
 f = open(result_file, 'w')
@@ -60,19 +56,34 @@ result_str = " - Filtered result by MS_stock_screener - \n"
 
 #going through each stock aquired.
 for stock in stocks_to_analyze:
-
-    print stock
-
-    #create handler for the stock
+    #initialize the stock handler
     handler = MS_stockHandler(google_stock_dict_data = stock)
-    print "analizing: ", handler.title.ljust(50), " ticker: ", handler.ticker
-
     #if hander is initialized without error
     if handler.initialized:
         #parse and initialize data before analize
         handler.parseBalanceSheet()
         handler.parseKeyRatios()
 
+        #calculate intrinsic value using buffettsbooks.com formula
+        latest_year = 2015
+        non_risk_rate = 1.77
+
+        bb_intrinsic_value = bb_ivalue(handler,latest_year,non_risk_rate)
+        #print data
+        print "+----------------------------------------------------------"
+        print "|    "+handler.title + "  ".ljust(20) + "ticker: "+handler.ticker
+        print "|    Market Value: ", handler.quote
+        print "+----------------------------------------------------------"
+        print "|    Data Period: " + str(latest_year-9) + "-" + str(latest_year)
+        print "|    Non-risk Rate (%):",non_risk_rate
+        print "|    (Buffettsbooks.com Formula)"
+        print "|    Intrinsit Value: ", bb_intrinsic_value
+        print "+----------------------------------------------------------"
+        print "\n"
+
+        #test charting
+        drawChart(handler)
+    """
         #get the numbers for calcalation.
         latest_current_ratio= handler.getFinancialData("key_ratios", "2015", "Current Ratio")
         latest_debt_equity = handler.getFinancialData("key_ratios", "2015", "Debt/Equity")
@@ -140,11 +151,16 @@ for stock in stocks_to_analyze:
                 result_str += "|    Intrinsit Value: "+ str(intrinsic_value)+"\n"
                 result_str += "+----------------------------------------------------------"+"\n"
                 result_str += "\n"+"\n"
+<<<<<<< HEAD
 
                 #test charting
                 drawChart(handler)
+=======
+        
+>>>>>>> master
     else:
         pass
+    """
 
 f.write(result_str)
 f.close()

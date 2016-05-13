@@ -5,6 +5,7 @@ import sys
 import threading
 import datetime
 import ast
+import random
 
 from globals import *
 
@@ -32,8 +33,9 @@ def retrieveStockList(exchange, retrieve_count=20):
             double check url see if we can grab more useful info.
 
     '''
+    retrieve_all = 1000
+    url = "https://www.google.com/finance?output=json&start=0&amp&num="+str(retrieve_all)+"&noIL=1&q=[%28exchange%20%3D%3D%20%22"+exchange+"%22%29%20%26%20%28dividend_next_year%20%3E%3D%200%29%20%26%20%28dividend_next_year%20%3C%3D%201.46%29%20%26%20%28price_to_sales_trailing_12months%20%3C%3D%20850%29]&restype=company&ei=BjE7VZmkG8XwuASFn4CoDg"
 
-    url = "https://www.google.com/finance?output=json&start=0&amp&num="+str(retrieve_count)+"&noIL=1&q=[%28exchange%20%3D%3D%20%22"+exchange+"%22%29%20%26%20%28dividend_next_year%20%3E%3D%200%29%20%26%20%28dividend_next_year%20%3C%3D%201.46%29%20%26%20%28price_to_sales_trailing_12months%20%3C%3D%20850%29]&restype=company&ei=BjE7VZmkG8XwuASFn4CoDg"
     #download
     url_data = urllib.urlretrieve(url, testfile)
     #convert to dict. get json working if possible.
@@ -42,17 +44,19 @@ def retrieveStockList(exchange, retrieve_count=20):
     #print texts
     stock_text_dict = ast.literal_eval(texts)
     #pprint.pprint(texts_dict)
-    searchresults = stock_text_dict["searchresults"]
 
+    search_result = stock_text_dict["searchresults"]
     result = []
-    for i in searchresults:
-        stock_data = getQuote(i['ticker'])
+    for i in range(1, retrieve_count):
+        rand_pick = random.choice(search_result)
+        stock_data = getQuote(rand_pick['ticker'])
+
         #if we got the data from google
         if stock_data:
             #append stock title.
-            stock_data['title'] = i['title']
+            stock_data['title'] = rand_pick['title']
             #over ride exchange
-            stock_data['exchange'] = i['exchange']
+            stock_data['exchange'] = rand_pick['exchange']
             result.append(stock_data)
 
     return result
@@ -74,9 +78,9 @@ def getQuote(ticker):
         {
             'id': '123456789'
             'quote': '106.65', 
-            'ticker': 'DIS', 
+            'ticker': 'XXX', 
             'exchange': 'NYSE',
-            'title: ''  
+            'title: 'The Company Name'
         }
 
     Note:
@@ -85,7 +89,9 @@ def getQuote(ticker):
 
     '''
     #threading.Timer(1.0, getquote).start()
-    target_url = "http://finance.google.com/finance/info?client=ig&q=" + ticker.lower()
+    #target_url = "http://finance.google.com/finance/info?client=ig&q=" + ticker.lower()
+    target_url = "http://www.google.com/finance/info?infotype=infoquoteall&q=" + ticker.lower()
+    
     try:
         data = urllib2.urlopen(target_url)
     except:
@@ -102,7 +108,7 @@ def getQuote(ticker):
                                     ticker=data_dict["t"], 
                                     exchange=data_dict["e"], 
                                     quote=data_dict["l"],
-                                    title="none")    #TODO: find a way to get title.
+                                    title=data_dict["name"])
 
     except Exception, e:
         print "error getting stock quote from ticker: ", ticker

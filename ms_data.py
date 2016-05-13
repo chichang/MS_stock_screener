@@ -42,7 +42,7 @@ import csv
 from globals import *
 import ms_parser
 
-#TODO: get all exchanges in here
+
 def mapExchange(exchange):
     em = dict(
         NYSE = "XNYS",
@@ -67,10 +67,13 @@ class MS_stockHandler(object):
             google_stock_dict_data: a dictionary for a stock from google api.
         '''
 
+        print google_stock_dict_data["ticker"]
+
         self.title = google_stock_dict_data["title"]
         self.ticker = google_stock_dict_data["ticker"]
         self.exchange = google_stock_dict_data["exchange"]
-        self.id = int(google_stock_dict_data["id"])
+        self.quote = google_stock_dict_data["quote"]
+        self.id = google_stock_dict_data["id"]
         self.csv_urls = dict()
         self.csv_files = dict()
 
@@ -130,7 +133,6 @@ class MS_stockHandler(object):
 
         #XNYS = nyse?
         #so hard coded to NYSE for now?
-
 
         kr_url1 = "http://financials.morningstar.com/ajax/exportKR2CSV.html?&callback=?&t="
         kr_url2 = ":"    #ticker gose here

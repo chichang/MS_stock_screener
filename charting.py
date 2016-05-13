@@ -43,7 +43,7 @@ def drawChart(handler, data_to_chart = "Book Value Per Share USD"):
     for i in range (0, 10):
         year = latest_year - i
         bps = handler.getFinancialData("key_ratios", str(year), data_to_chart)
-        if bps == None:
+        if not bps:
             price_list[str(year)] = None
         else:
             price_list[str(year)] = float(bps)
@@ -69,7 +69,8 @@ def drawChart(handler, data_to_chart = "Book Value Per Share USD"):
 
     chart_title_text = handler.exchange+":"+handler.ticker
     w.create_text(10, 10, text=chart_title_text, fill="blue", anchor="nw", font=("Purisa", 15))
-    w.create_text(10, 30, text=data_to_chart, fill="black",anchor="nw")
+    w.create_text(10, 30, text=handler.title, fill="black",anchor="nw")
+    w.create_text(10, 40, text=data_to_chart, fill="red",anchor="nw")
     master.title(chart_title_text+"  "+data_to_chart)
 
     #bg lines
