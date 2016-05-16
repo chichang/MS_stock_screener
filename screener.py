@@ -32,6 +32,7 @@ from globals import *
 from ms_data import MS_stockHandler
 import gf_data
 from calculators import bb_ivalue
+from calculators import bb_dcf_ivalue
 from charting import drawChart
 
 #setup logger
@@ -46,7 +47,7 @@ logger.info("Starting Stock Screener.")
 #from exchange to get a "random" number of stocks. TODO: put these as commandline args.
 stock_exchange = "NYSE"
 retrieve_num = 20
-test_stocks = ["KO", "DWA", "DV"]
+test_stocks = ["KO", "DWA"]
 
 #get the stock data
 stocks_to_analyze = []
@@ -78,7 +79,7 @@ for stock in stocks_to_analyze:
         non_risk_rate = 1.77
 
         bb_intrinsic_value = bb_ivalue(handler,latest_year,non_risk_rate)
-
+        bb_ncf_intrinsic_value = bb_dcf_ivalue(handler,latest_year,non_risk_rate)
         #fits criteria? a class to handle criteria. and logic.
         #something like
         #   criteria = SearchCriteia(criteria="some_rule.txt")

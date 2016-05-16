@@ -9,6 +9,13 @@ import random
 
 from globals import *
 
+#setup logger
+import logging
+from logger import setup_logging
+logger = logging.getLogger(__name__)
+setup_logging()
+
+#
 testfile = TEMP_DIR+"temp_gs_stock_list.txt"
 import os
 try:

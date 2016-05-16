@@ -70,6 +70,7 @@ class MS_stockHandler(object):
             ticker (str): stock ticker simble.
             exchange (str): the exchange the stock is listed.
             id (int): id used in the google database.
+
         Args:
             google_stock_dict_data: a dictionary for a stock from google api.
         '''
@@ -178,7 +179,7 @@ class MS_stockHandler(object):
             csv_file_name = "%s_%s.csv" % (self.ticker.lower(), key)
             csv_full_path = os.path.join(self.temp_csv_dir, csv_file_name)
 
-            logger.debug("retrieving csv data from url: %s", csv_full_path)
+            logger.debug("retrieving csv data to: %s", csv_full_path)
             self.download(self.csv_urls[key], csv_full_path)
 
             #TODO: error check here by simply checking downloaded file size for now.
