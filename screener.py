@@ -27,29 +27,34 @@ Attributes:
    http://google.github.io/styleguide/pyguide.html
 
 """
+
+from time import gmtime, strftime
 import math
 from globals import *
 from ms_data import MS_stockHandler
 import gf_data
+#import algo
 from calculators import bb_ivalue
 from calculators import bb_dcf_ivalue
 from charting import drawChart
+
 
 #setup logger
 import logging
 from logger import setup_logging
 logger = logging.getLogger(__name__)
 setup_logging()
-
-
-logger.info("Starting Stock Screener.")
+Mastering Python for Finance
+print "=================================================="
+print   "Starting Stock Screener."
+print "=================================================="
 
 #from exchange to get a "random" number of stocks. TODO: put these as commandline args.
 stock_exchange = "NYSE"
-retrieve_num = 20
-test_stocks = ["KO", "DWA"]
+retrieve_num = 5
+test_stocks = []#["AP"]
 
-#get the stock data
+#get the stock indexes to screen.
 stocks_to_analyze = []
 if test_stocks:
     for i in test_stocks:
@@ -59,10 +64,14 @@ if test_stocks:
 else:
     stocks_to_analyze = gf_data.retrieveStockList(stock_exchange, retrieve_num)
 
-#file to save the filtered restults.
-result_file = TEMP_DIR+"test_result.txt"
+logging.info("Filtering through " + str(len(stocks_to_analyze)) + " stocks. \n")
+
+#setup file to save the filtered restults.
+result_file = TEMP_DIR + "test_result.txt"
 f = open(result_file, 'w')
-result_str = " - Filtered result by MS_stock_screener - \n"
+result_str = "\n - Filtered result by MS_stock_screener - \n"
+result_str += " - " + strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " - \n"
+
 
 #going through each stock aquired.
 for stock in stocks_to_analyze:
@@ -75,11 +84,14 @@ for stock in stocks_to_analyze:
         handler.parseKeyRatios()
 
         #calculate intrinsic value using buffettsbooks.com formula
-        latest_year = 2015
+        latest_year = 2016
         non_risk_rate = 1.77
-
+    
+        #buffet books intrinsic algo
         bb_intrinsic_value = bb_ivalue(handler,latest_year,non_risk_rate)
-        bb_ncf_intrinsic_value = bb_dcf_ivalue(handler,latest_year,non_risk_rate)
+        #bb_ncf_intrinsic_value = bb_dcf_ivalue(handler,latest_year,non_risk_rate)
+        
+
         #fits criteria? a class to handle criteria. and logic.
         #something like
         #   criteria = SearchCriteia(criteria="some_rule.txt")
@@ -93,11 +105,24 @@ for stock in stocks_to_analyze:
         print "|    Non-risk Rate (%):",non_risk_rate
         print "|    (Buffettsbooks.com Formula)"
         print "|    Intrinsit Value: ", bb_intrinsic_value
+        #print "|    NCF Intrinsit Value: ", bb_ncf_intrinsic_value
         print "+----------------------------------------------------------"
         print "\n"
 
-        #test charting
-        #drawChart(handler)
+        if bb_intrinsic_value and float(bb_intrinsic_value) > float(handler.quote):
+            result_str +=  "+----------------------------------------------------------" +"\n"
+            result_str +=   "|    "+handler.title + "  ".ljust(20) + "ticker: "+ handler.ticker +"\n"
+            result_str +=   "|    Market Value: " + str(handler.quote) +"\n"
+            result_str +=   "+----------------------------------------------------------" +"\n"
+            result_str +=   "|    Data Period: " + str(latest_year-9) + "-" + str(latest_year) +"\n"
+            result_str +=   "|    Non-risk Rate (%):"+ str(non_risk_rate) +"\n"
+            result_str +=   "|    (Buffettsbooks.com Formula)" +"\n"
+            result_str +=   "|    Intrinsit Value: " + str(bb_intrinsic_value) +"\n"
+            #print "|    NCF Intrinsit Value: ", bb_ncf_intrinsic_value
+            result_str +=   "+----------------------------------------------------------" +"\n"
+            result_str +=   "\n"
+            #test charting
+            #drawChart(handler)
 
 
     """
@@ -167,13 +192,9 @@ for stock in stocks_to_analyze:
                 result_str += "|    Intrinsit Value: "+ str(intrinsic_value)+"\n"
                 result_str += "+----------------------------------------------------------"+"\n"
                 result_str += "\n"+"\n"
-<<<<<<< HEAD
 
                 #test charting
                 drawChart(handler)
-=======
-        
->>>>>>> master
     else:
         pass
     """

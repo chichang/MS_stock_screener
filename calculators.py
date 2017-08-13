@@ -11,18 +11,19 @@ def bb_ivalue(handler, latestYear, rate):
     current_year = str(latestYear)
     years = 10
     old_year = str(int(current_year) - (years-1))
-    current_book_value = handler.getFinancialData("key_ratios", current_year, "Book Value Per Share USD")
-    old_book_value = handler.getFinancialData("key_ratios", old_year , "Book Value Per Share USD")
-    current_dividend = handler.getFinancialData("key_ratios", "2015", "Dividends USD")
+    #current_book_value = handler.getFinancialData("key_ratios", current_year, "Book Value Per Share USD")
+    current_book_value = handler.getFinancialData("key_ratios", current_year, "Book Value Per Share * USD") #TODO: string in csv file may change 
+    old_book_value = handler.getFinancialData("key_ratios", old_year , "Book Value Per Share * USD")
+    current_dividend = handler.getFinancialData("key_ratios", current_year, "Dividends USD")
     treasure_rate = rate/100 
           
     #calculate intrinsit value
     if current_dividend == False:
         logger.warning("%s doesn't have dividend information.", handler.ticker)
     elif not old_book_value:
-        logger.warning("%s doesn't have 2006 book value data.", handler.ticker)
+        logger.warning("%s doesn't have old book value data.", handler.ticker)
     elif not current_book_value:
-        logger.warning("%s doesn't have 2015 book value data.", handler.ticker)
+        logger.warning("%s doesn't have current book value data.", handler.ticker)
     else:
         if current_dividend == None:
             logger.warning("%s doesn't issue dividend.", handler.ticker)

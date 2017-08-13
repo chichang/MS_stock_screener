@@ -234,6 +234,7 @@ class MS_stockHandler(object):
         '''
         ms_parser._parseKeyRatios(self)
 
+
     def getFinancialData(self, statement_type, key, item):
         '''basic function for aquiring data from handler.
         data must be parsed first befor getting them.
@@ -245,7 +246,7 @@ class MS_stockHandler(object):
                 try:
                     return self.parsed_bs_data[key][item]
                 except:
-                    logger.warning("fail getting data for: ", key, item)
+                    print "fail getting data for: ", key, item
                     return False
             else:
                 logger.info("no parsed balance sheet data found. Please parse data. handler.parseBalanceSheet()")
@@ -256,7 +257,7 @@ class MS_stockHandler(object):
                 try:
                     return self.parsed_is_data[key][item]
                 except:
-                    logger.warning("fail getting data for: ", key, item)
+                    print "fail getting data for: ", key, item
                     return False
             else:
                 logger.info("no parsed income statement data found. Please parse data. handler.parseIncomeStatement()")
@@ -268,7 +269,7 @@ class MS_stockHandler(object):
                 try:
                     return self.parsed_cf_data[key][item]
                 except:
-                    logger.warning("fail getting data for: ", key, item)
+                    print "fail getting data for: ", key, item
                     return False
             else:
                 logger.info("no parsed cash flow data found. Please parse data. handler.parseCashFlow()")
@@ -277,10 +278,11 @@ class MS_stockHandler(object):
 
         elif statement_type == "key_ratios":
             if hasattr(self, 'parsed_kr_data'):
+                #print self.parsed_kr_data[key]["Book Value Per Share * USD"]
                 try:
                     return self.parsed_kr_data[key][item]
                 except:
-                    logger.warning("fail getting data for: ", key, item)
+                    print "fail getting data for: ", key, item
                     return False
             else:
                 logger.info("no parsed key ratios data found. Please parse data. handler.parseKeyRatios()")
@@ -301,3 +303,6 @@ class MS_stockHandler(object):
         '''check the csv file.
         '''
         pass
+    
+    
+    #TODO: helper functions for checking parsed data.
